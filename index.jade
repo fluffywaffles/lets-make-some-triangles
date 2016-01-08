@@ -12,6 +12,7 @@ html
       }
       
       #triangles {
+        position: absolute;
         height: 100%;
         width: 100%;
       }
@@ -22,15 +23,29 @@ html
     script(src='../paper-full.js')
     
     script(type='text/paperscript', canvas='triangles').
-      var numTriangles = 50
+    
+      var canvas = document.getElementById('triangles')
+    
+      function sideLengthFromRadius (radius) {
+        return radius * Math.sqrt(3)
+      }
       
-      var triangleRadius  = 20
-      var baseX = triangleRadius, baseY = triangleRadius
+      function triangleHeightFromSideLength (l) {
+        var l2 = Math.pow(l, 2)
+        return Math.sqrt(3/4 * l2)
+      }
+    
+      var numTriangles    = 50
       
-      for (var j = 0; j < numTriangles; j ++) {
-        for (var i = 0; i < numTriangles; i++) {
-          var x = baseX + i * 25/15 * triangleRadius
-          var y = baseY + j * 44/15 * triangleRadius
+      var triangleSide    = canvas.width / numTriangles
+      var triangleRadius  = triangleSide / Math.sqrt(3)
+      var triangleHeight  = triangleHeightFromSideLength(triangleSide - 1)
+      var baseX = -triangleSide / 2, baseY = -triangleHeight / 2
+      
+      for (var j = 0; j <= numTriangles; j ++) {
+        for (var i = 0; i <= numTriangles; i++) {
+          var x = baseX + i * triangleSide
+          var y = baseY + j * 2 * triangleHeight
           var center  = new Point(x, y)
           
           var triangle = new Path.RegularPolygon(center, 3, triangleRadius)
@@ -38,15 +53,13 @@ html
 
           var tri2 = triangle.clone()
           tri2.scale(1, -1)
-          tri2.position = new Point(x, y + 18/15 * triangleRadius)
+          tri2.position += new Point(0, triangleHeight)
           
           var diamond = new Group([ triangle, tri2 ])
-          
+        
           var offsetDiamond = diamond.clone()
           
-          offsetDiamond.position += new Point(triangleRadius + 2, triangleRadius)
+          offsetDiamond.position += new Point(triangleSide/2, triangleHeight)
           offsetDiamond.fillColor = '#aa55aa'
-          
         }
       }
-        
