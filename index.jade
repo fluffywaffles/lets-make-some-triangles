@@ -35,12 +35,12 @@ html
         return Math.sqrt(3/4 * l2)
       }
     
-      var numTriangles    = 50
-      
-      var triangleSide    = canvas.width / numTriangles
-      var triangleRadius  = triangleSide / Math.sqrt(3)
-      var triangleHeight  = triangleHeightFromSideLength(triangleSide - 1)
-      var baseX = -triangleSide / 2, baseY = -triangleHeight / 2
+      var numTriangles     = 25
+      var triangleSide     = canvas.width / numTriangles
+      var triangleRadius   = triangleSide / Math.sqrt(3)
+      var triangleHeight   = triangleHeightFromSideLength(triangleSide - 1)
+      // NOTE(jordan): can derive baseY using Law of Sines
+      var baseX = 0, baseY = -triangleHeight/3
       
       for (var j = 0; j <= numTriangles; j ++) {
         for (var i = 0; i <= numTriangles; i++) {
