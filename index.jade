@@ -35,8 +35,10 @@ html
         return Math.sqrt(3/4 * l2)
       }
     
-      var numTriangles     = 25
-      var triangleSide     = canvas.width / numTriangles
+      //var numTriangles     = 40
+      //var triangleSide     = canvas.width / numTriangles
+      var triangleSide     = 50
+      var numTriangles     = canvas.width / triangleSide
       var triangleRadius   = triangleSide / Math.sqrt(3)
       var triangleHeight   = triangleHeightFromSideLength(triangleSide - 1)
       // NOTE(jordan): can derive baseY using Law of Sines
@@ -44,9 +46,9 @@ html
       
       for (var j = 0; j <= numTriangles; j ++) {
         for (var i = 0; i <= numTriangles; i++) {
-          var x = baseX + i * triangleSide
-          var y = baseY + j * 2 * triangleHeight
-          var center  = new Point(x, y)
+          var x      = baseX + i * triangleSide
+          var y      = baseY + j * 2 * triangleHeight
+          var center = new Point(x, y)
           
           var triangle = new Path.RegularPolygon(center, 3, triangleRadius)
           triangle.fillColor = '#55aaaa'
