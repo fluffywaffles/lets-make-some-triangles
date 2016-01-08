@@ -1,0 +1,52 @@
+doctype html
+
+html
+  head
+    title let's make some triangles
+    
+    style.
+      html, body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+      
+      #triangles {
+        height: 100%;
+        width: 100%;
+      }
+  
+  body
+    canvas#triangles
+    
+    script(src='../paper-full.js')
+    
+    script(type='text/paperscript', canvas='triangles').
+      var numTriangles = 50
+      
+      var triangleRadius  = 20
+      var baseX = triangleRadius, baseY = triangleRadius
+      
+      for (var j = 0; j < numTriangles; j ++) {
+        for (var i = 0; i < numTriangles; i++) {
+          var x = baseX + i * 25/15 * triangleRadius
+          var y = baseY + j * 44/15 * triangleRadius
+          var center  = new Point(x, y)
+          
+          var triangle = new Path.RegularPolygon(center, 3, triangleRadius)
+          triangle.fillColor = '#55aaaa'
+
+          var tri2 = triangle.clone()
+          tri2.scale(1, -1)
+          tri2.position = new Point(x, y + 18/15 * triangleRadius)
+          
+          var diamond = new Group([ triangle, tri2 ])
+          
+          var offsetDiamond = diamond.clone()
+          
+          offsetDiamond.position += new Point(triangleRadius + 2, triangleRadius)
+          offsetDiamond.fillColor = '#aa55aa'
+          
+        }
+      }
+        
