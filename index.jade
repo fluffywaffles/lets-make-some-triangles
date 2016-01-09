@@ -20,48 +20,76 @@ html
   body
     canvas#triangles
     
-    script(src='../paper-full.js')
-    
-    script(type='text/paperscript', canvas='triangles').
-    
-      var canvas = document.getElementById('triangles')
-    
-      function sideLengthFromRadius (radius) {
-        return radius * Math.sqrt(3)
-      }
-      
+    script#colors.
+      var aquaish = '#55aaaa'
+      var pastelPurple = '#aa55aa'
+  
+    script#triangle-math.
       function triangleHeightFromSideLength (l) {
         var l2 = Math.pow(l, 2)
         return Math.sqrt(3/4 * l2)
       }
     
-      //var numTriangles     = 40
-      //var triangleSide     = canvas.width / numTriangles
-      var triangleSide     = 50
-      var numTriangles     = canvas.width / triangleSide
-      var triangleRadius   = triangleSide / Math.sqrt(3)
-      var triangleHeight   = triangleHeightFromSideLength(triangleSide - 1)
-      // NOTE(jordan): can derive baseY using Law of Sines
-      var baseX = 0, baseY = -triangleHeight/3
+    script.
+      var canvas = document.getElementById('triangles')
       
-      for (var j = 0; j <= numTriangles; j ++) {
-        for (var i = 0; i <= numTriangles; i++) {
-          var x      = baseX + i * triangleSide
-          var y      = baseY + j * 2 * triangleHeight
-          var center = new Point(x, y)
-          
-          var triangle = new Path.RegularPolygon(center, 3, triangleRadius)
-          triangle.fillColor = '#55aaaa'
+      function resizeCanvas () {
+        canvas.width  = window.innerWidth
+        canvas.height = window.innerHeight
+      }
+      
+      resizeCanvas()
+      
+      window.addEventListener('resize', resizeCanvas)
 
-          var tri2 = triangle.clone()
-          tri2.scale(1, -1)
-          tri2.position += new Point(0, triangleHeight)
-          
-          var diamond = new Group([ triangle, tri2 ])
+      var ctx = canvas.getContext('2d')
+      ctx.imageSmoothingEnabled = false
+      //ctx.translate(0.5, 0.5)
+      
+      // NOTE(jordan): equilateral
+      function triangle (pen, x, y, base, height, color) {
+        pen.beginPath()
+        pen.moveTo(x, y)
+        pen.lineTo(x + base/2, y - height)
+        pen.lineTo(x + base, y)
+        pen.fillStyle = color
+        pen.fill()
+      }
+      
+      var side = 50
+      var height = triangleHeightFromSideLength(side)
+      
+      function drawTriangles () {
+        //var numTriangles = 5
+        //var triangleSide = canvas.width / numTriangles
+        var triangleSide = 150
+        var numTriangles = 1 + ((canvas.width / triangleSide) | 0)
+        // NOTE(jordan): try removing the | 0 and notice the weird edge artifacts
+        // unsure of the explanation, but I got the inspiration for the fix from
+        // seeing how Math.floor can bug up canvas implementations by not resulting
+        // in proper integers
+        var triangleHeight = (triangleHeightFromSideLength(triangleSide) | 0)
+        var baseX = -triangleSide/2, baseY = -triangleHeight
         
-          var offsetDiamond = diamond.clone()
-          
-          offsetDiamond.position += new Point(triangleSide/2, triangleHeight)
-          offsetDiamond.fillColor = '#aa55aa'
+        for (var j = 0; j <= numTriangles; j++) {
+          for (var i = 0; i <= numTriangles; i++) {
+            var x = baseX + i * triangleSide
+            var y = baseY + j * 2 * triangleHeight
+            
+            triangle(ctx, x, y, triangleSide, triangleHeight, aquaish)
+            triangle(ctx, x, y, triangleSide, -triangleHeight, aquaish)
+            
+            ctx.save()
+            
+            ctx.translate(triangleSide/2, triangleHeight)
+            
+            triangle(ctx, x, y, triangleSide, triangleHeight, pastelPurple)
+            triangle(ctx, x, y, triangleSide, -triangleHeight, pastelPurple)
+            
+            ctx.restore()
+          }
         }
       }
+      
+      drawTriangles()
+      window.addEventListener('resize', drawTriangles)
