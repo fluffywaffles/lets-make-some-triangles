@@ -27,7 +27,7 @@ html
     script#triangle-math.
       function triangleHeightFromSideLength (l) {
         var l2 = Math.pow(l, 2)
-        return Math.sqrt(3/4 * l2)
+        return Math.sqrt(3/4 * l2) | 0
       }
     
     script.
@@ -39,8 +39,6 @@ html
       }
       
       resizeCanvas()
-      
-      window.addEventListener('resize', resizeCanvas)
 
       var ctx = canvas.getContext('2d')
       ctx.imageSmoothingEnabled = false
@@ -56,40 +54,58 @@ html
         pen.fill()
       }
       
-      var side = 50
+      var side = 150
       var height = triangleHeightFromSideLength(side)
+      var numTriangles = 2 + ((canvas.width / side) | 0)
+      var baseX = -side/2, baseY = -height
       
-      function drawTriangles () {
-        //var numTriangles = 5
-        //var triangleSide = canvas.width / numTriangles
-        var triangleSide = 150
-        var numTriangles = 1 + ((canvas.width / triangleSide) | 0)
-        // NOTE(jordan): try removing the | 0 and notice the weird edge artifacts
-        // unsure of the explanation, but I got the inspiration for the fix from
-        // seeing how Math.floor can bug up canvas implementations by not resulting
-        // in proper integers
-        var triangleHeight = (triangleHeightFromSideLength(triangleSide) | 0)
-        var baseX = -triangleSide/2, baseY = -triangleHeight
-        
+      function resize () {
+        resizeCanvas()
+        numTriangles = 2 + ((canvas.width / side) | 0)
+      }
+      
+      function drawTriangles (startX, startY) {
         for (var j = 0; j <= numTriangles; j++) {
           for (var i = 0; i <= numTriangles; i++) {
-            var x = baseX + i * triangleSide
-            var y = baseY + j * 2 * triangleHeight
+            var x = startX + i * side
+            var y = startY + j * 2 * height
             
-            triangle(ctx, x, y, triangleSide, triangleHeight, aquaish)
-            triangle(ctx, x, y, triangleSide, -triangleHeight, aquaish)
+            triangle(ctx, x, y, side, height, aquaish)
+            triangle(ctx, x, y, side, -height, aquaish)
             
             ctx.save()
             
-            ctx.translate(triangleSide/2, triangleHeight)
+            ctx.translate(side/2, height)
             
-            triangle(ctx, x, y, triangleSide, triangleHeight, pastelPurple)
-            triangle(ctx, x, y, triangleSide, -triangleHeight, pastelPurple)
+            triangle(ctx, x, y, side, height, pastelPurple)
+            triangle(ctx, x, y, side, -height, pastelPurple)
             
             ctx.restore()
           }
         }
       }
+
+      var t = Date.now()
+      drawTriangles(baseX, baseY)
+
+      var x = baseX
+      var y = baseY
       
-      drawTriangles()
-      window.addEventListener('resize', drawTriangles)
+      var xdrift = 1
+      var ydrift = -1
+
+      function render () {
+        // NOTE(jordan): lock down framerate ~ 60fps
+        if (Date.now() - t >= 16) {
+          t = Date.now()
+          x = (x + xdrift) % (side) - (side)
+          y = (y + ydrift) % (2 * height) - 2 * height
+          drawTriangles(x, y)
+        }
+        xdrift = 10 * Math.sin(t / 800)
+        ydrift = 10 * Math.sin(Math.PI / 2 + t / 1000)
+        window.requestAnimationFrame(render)
+      }
+
+      window.requestAnimationFrame(render)
+      window.addEventListener('resize', resize)
